@@ -115,9 +115,10 @@ export function signIn() {
 
     const authUrl = new URL('https://github.com/login/oauth/authorize');
     authUrl.searchParams.set('client_id',     await ghClientId());
-    // TEMP: pointing back at the worker callback until the GitHub App's
-    // Callback URL is updated to https://nxn94.github.io/AutoMorpheBuilder-UI/auth-callback.html
-    authUrl.searchParams.set('redirect_uri',  `${AUTH_BASE}/callback`);
+    // Callback URL on the UI's own origin so the popup's window.opener survives
+    // the OAuth redirect chain. The callback page calls our worker's /token
+    // endpoint server-side to exchange the code with the App's client_secret.
+    authUrl.searchParams.set('redirect_uri',  AUTH_BASE_REDIRECT);
     authUrl.searchParams.set('state',         state);
     authUrl.searchParams.set('code_challenge', challenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');
