@@ -165,9 +165,8 @@
 
     <h3>Limitations</h3>
     <ul>
-      <li>The UI cannot commit back to GitHub in v1 — it downloads files you commit yourself. PR-back via the Contents API is on the roadmap.</li>
       <li>The UI does not read <code>patches-list.json</code> from upstream patch repos. It edits whatever patches you currently have toggles for, plus lets you add/remove arbitrary new patches.</li>
-      <li>The UI runs entirely in your browser. No data leaves your machine unless you click <em>Fetch</em>.</li>
+      <li>The UI runs entirely in your browser. The only network calls after sign-in are to the GitHub Contents API (for the PR), which the GitHub App authorizes.</li>
     </ul>
   </section>
 
@@ -181,5 +180,40 @@
 
   <script src="assets/json-editor.min.js"></script>
   <script type="module" src="assets/app.js"></script>
+
+  <!-- Save PR modal: opened by app.js when the user clicks "Save & open PR". -->
+  <dialog id="save-modal" class="modal" aria-labelledby="save-modal-title-label">
+    <form method="dialog" class="modal-form">
+      <header class="modal-head">
+        <h2 id="save-modal-title-label">Open a pull request</h2>
+        <button type="button" class="modal-x" value="cancel" aria-label="Close">×</button>
+      </header>
+      <p class="modal-summary">
+        Files to commit: <code id="save-modal-files"></code>
+      </p>
+      <label class="field">
+        <span>Repository</span>
+        <input type="text" id="save-modal-repo" required pattern="[^/\s]+/[^/\s]+" placeholder="owner/repo" autocomplete="off" />
+        <small>The fork or repo to open the PR against. Must have the GitHub App installed.</small>
+      </label>
+      <label class="field">
+        <span>Branch</span>
+        <input type="text" id="save-modal-branch" required pattern="[\w./\-]+" placeholder="automorphe-ui-…" autocomplete="off" />
+        <small>New branch name. The branch is created from the repo's default branch.</small>
+      </label>
+      <label class="field">
+        <span>Title</span>
+        <input type="text" id="save-modal-title" required placeholder="UI: update …" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span>Description</span>
+        <textarea id="save-modal-body" rows="4" placeholder="What changed and why?"></textarea>
+      </label>
+      <footer class="modal-foot">
+        <button type="button" class="btn" value="cancel">Cancel</button>
+        <button type="submit" class="btn primary" value="submit">Open pull request</button>
+      </footer>
+    </form>
+  </dialog>
 </body>
 </html>
