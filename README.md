@@ -1,5 +1,9 @@
 # AutoMorpheBuilder UI
 
+<p align="center">
+  <img src="assets/logo-wordmark.png" alt="AutoMorpheBuilder logo" width="320" />
+</p>
+
 A static, no-build, no-server UI for configuring your fork of
 [nxn94/AutoMorpheBuilder](https://github.com/nxn94/AutoMorpheBuilder). Loads,
 validates, and lets you edit `patches.json` and `config.json` from the browser,
