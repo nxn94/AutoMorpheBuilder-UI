@@ -290,58 +290,265 @@ label.btn { cursor: pointer; }
 #tab-about li { margin-bottom: var(--sp-1); }
 #tab-about code { font-size: 0.825em; }
 
-#config-editor .je-object__container { background: transparent; }
-#config-editor h3 { font-size: var(--fs-md); margin: var(--sp-3) 0 var(--sp-2); }
-#config-editor .form-control,
-#config-editor .je-edit-json--textarea,
+/* ─── JSONEditor overrides ──────────────────────────────────────────────────
+   The barebones theme emits raw <input>, <select>, <textarea> with no
+   class, so we target via #config-editor descendant selectors with full
+   border/padding shorthand to defeat the browser's user-agent defaults
+   (`2px inset` etc.) that give the controls their default-look.          */
+#config-editor .je-object__container,
+#config-editor .je-array__container { background: transparent; }
+#config-editor h3 { font-size: var(--fs-md); margin: var(--sp-3) 0 var(--sp-2); font-weight: 600; letter-spacing: -0.005em; }
+
+/* Form controls — full shorthand so we win against user-agent defaults */
+#config-editor input[type=text],
+#config-editor input[type=number],
+#config-editor input[type=password],
 #config-editor textarea,
 #config-editor select,
-#config-editor input[type=text],
-#config-editor input[type=number] {
+#config-editor .form-control,
+#config-editor .je-edit-json--textarea {
   background: var(--color-bg-elevated) !important;
   color: var(--color-text) !important;
-  border-color: var(--color-border) !important;
-  border-radius: var(--r-md);
-  box-shadow: inset 0 1px 0 rgba(15, 17, 21, .04);
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--r-md) !important;
+  padding: 6px 10px !important;
+  font: inherit !important;
+  font-size: var(--fs-sm) !important;
+  line-height: 1.4 !important;
+  box-shadow: inset 0 1px 0 rgba(15, 17, 21, .04) !important;
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast) !important;
+  box-sizing: border-box !important;
+  width: auto !important;
+  min-height: 32px !important;
 }
+#config-editor input[type=text]:focus,
+#config-editor input[type=number]:focus,
+#config-editor textarea:focus,
+#config-editor select:focus,
+#config-editor .form-control:focus-within,
+#config-editor .je-edit-json--textarea:focus {
+  outline: none !important;
+  border-color: var(--color-link) !important;
+  box-shadow: var(--shadow-focus) !important;
+}
+#config-editor .form-control {
+  /* JSONEditor wraps the input + label in .form-control. Give it breathing room. */
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  margin-bottom: 12px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+}
+#config-editor .form-control > label {
+  font-size: var(--fs-sm) !important;
+  font-weight: 500 !important;
+  color: var(--color-text) !important;
+  margin: 0 !important;
+}
+#config-editor .form-control > .required::after { content: ' *'; color: var(--color-error-text); }
+#config-editor .form-control > .errmsg {
+  color: var(--color-error-text) !important;
+  font-size: var(--fs-xs) !important;
+  display: block !important;
+  margin-top: 4px !important;
+}
+
+/* Selectize-style select dropdowns */
+#config-editor select {
+  padding-right: 28px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2357606a' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 12px !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  cursor: pointer !important;
+}
+
+/* Object/array header row: collapse button + title + actions */
+#config-editor .je-object__title,
+#config-editor .je-array__title {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--sp-2) !important;
+  padding: 0 !important;
+  margin: 0 0 var(--sp-2) !important;
+  font-size: var(--fs-md) !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--color-text) !important;
+}
+#config-editor .je-object__title > label,
+#config-editor .je-array__title > label { flex: 1 !important; }
+#config-editor .je-object__controls,
+#config-editor .je-array__controls {
+  display: flex !important;
+  gap: var(--sp-1) !important;
+  position: relative !important;
+  margin-left: auto !important;
+  align-items: center !important;
+}
+#config-editor .json-editor-btn-collapse,
+#config-editor .json-editor-btn-edit,
+#config-editor .json-editor-btn-properties,
+#config-editor .json-editor-btn-save,
+#config-editor .json-editor-btn-cancel,
+#config-editor .json-editor-btn-copy,
+#config-editor .json-editor-btn-add,
+#config-editor .json-editor-btn-delete,
+#config-editor .json-editor-btn-move,
+#config-editor .json-editor-btntype-toggle,
+#config-editor .json-editor-btntype-add,
+#config-editor .json-editor-btntype-editjson,
+#config-editor .json-editor-btntype-properties,
+#config-editor .json-editor-btntype-save,
+#config-editor .json-editor-btntype-cancel,
+#config-editor .json-editor-btntype-copy {
+  background: var(--color-bg-muted) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--r-sm) !important;
+  padding: 3px 10px !important;
+  font-size: var(--fs-xs) !important;
+  font-family: inherit !important;
+  cursor: pointer !important;
+  box-shadow: var(--shadow-xs) !important;
+  transition: background-color var(--motion-fast), border-color var(--motion-fast) !important;
+}
+#config-editor button:hover { background: var(--color-bg-hover) !important; border-color: var(--color-border-strong) !important; }
+
+/* Indented object/array containers get subtle left border for hierarchy */
+#config-editor .je-indented-panel {
+  margin-left: var(--sp-3) !important;
+  padding-left: var(--sp-3) !important;
+  border-left: 2px solid var(--color-border) !important;
+}
+
+/* "Add property" modal that pops up when clicking the + on object controls */
+#config-editor .je-modal {
+  position: absolute !important;
+  z-index: 100 !important;
+  top: 32px !important;
+  right: 0 !important;
+  background: var(--color-bg-elevated) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--r-md) !important;
+  padding: var(--sp-3) !important;
+  box-shadow: var(--shadow-md) !important;
+  min-width: 240px !important;
+}
+#config-editor .je-modal .property-selector {
+  display: flex !important; flex-direction: column !important; gap: var(--sp-2) !important;
+  margin-bottom: var(--sp-2) !important;
+}
+#config-editor .je-modal .property-selector-input {
+  background: var(--color-bg-elevated) !important;
+  color: var(--color-text) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--r-sm) !important;
+  padding: 4px 8px !important;
+  font: inherit !important;
+  font-size: var(--fs-sm) !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Description text under each form field */
+#config-editor .je-form-input-description,
+#config-editor .je-desc {
+  font-size: var(--fs-xs) !important;
+  color: var(--color-text-muted) !important;
+  margin-top: 4px !important;
+  display: block !important;
+}
+#config-editor .je-label,
+#config-editor .je-form-input-label { color: var(--color-text) !important; }
+
+/* Dark mode overrides for everything above */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .form-control,
-  :root:not([data-theme="light"]) .je-edit-json--textarea,
-  :root:not([data-theme="light"]) textarea,
-  :root:not([data-theme="light"]) select,
-  :root:not([data-theme="light"]) input[type=text],
-  :root:not([data-theme="light"]) input[type=number] {
+  :root:not([data-theme="light"]) #config-editor input[type=text],
+  :root:not([data-theme="light"]) #config-editor input[type=number],
+  :root:not([data-theme="light"]) #config-editor input[type=password],
+  :root:not([data-theme="light"]) #config-editor textarea,
+  :root:not([data-theme="light"]) #config-editor select,
+  :root:not([data-theme="light"]) #config-editor .form-control,
+  :root:not([data-theme="light"]) #config-editor .je-edit-json--textarea {
     background: var(--color-bg) !important;
     color: var(--color-text) !important;
     border-color: var(--color-border) !important;
   }
-  :root:not([data-theme="light"]) .je-object__container { border-color: var(--color-border) !important; }
-  :root:not([data-theme="light"]) .je-object__controls button,
-  :root:not([data-theme="light"]) .je-array-control-btn { color: var(--color-text-muted) !important; }
-  :root:not([data-theme="light"]) .je-modal { background-color: var(--color-bg-elevated) !important; border-color: var(--color-border) !important; }
-  :root:not([data-theme="light"]) .je-label,
-  :root:not([data-theme="light"]) .je-form-input-label { color: var(--color-text) !important; }
-  :root:not([data-theme="light"]) .je-desc,
-  :root:not([data-theme="light"]) .je-form-input-description { color: var(--color-text-muted) !important; }
+  :root:not([data-theme="light"]) #config-editor .form-control,
+  :root:not([data-theme="light"]) #config-editor .je-object__container,
+  :root:not([data-theme="light"]) #config-editor .je-array__container { background: transparent !important; }
+  :root:not([data-theme="light"]) #config-editor select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238d96a0' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") !important;
+  }
+  :root:not([data-theme="light"]) #config-editor .je-indented-panel { border-left-color: var(--color-border) !important; }
+  :root:not([data-theme="light"]) #config-editor .je-object__controls button,
+  :root:not([data-theme="light"]) #config-editor .je-array-control-btn,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-collapse,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-edit,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-properties,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-save,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-cancel,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-copy,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-add,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-delete,
+  :root:not([data-theme="light"]) #config-editor .json-editor-btn-move {
+    background: var(--color-bg-muted) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+  }
+  :root:not([data-theme="light"]) #config-editor .je-modal { background: var(--color-bg-elevated) !important; border-color: var(--color-border) !important; }
+  :root:not([data-theme="light"]) #config-editor .je-label,
+  :root:not([data-theme="light"]) #config-editor .je-form-input-label { color: var(--color-text) !important; }
+  :root:not([data-theme="light"]) #config-editor .je-form-input-description,
+  :root:not([data-theme="light"]) #config-editor .je-desc { color: var(--color-text-muted) !important; }
 }
-:root[data-theme="dark"] .form-control,
-:root[data-theme="dark"] .je-edit-json--textarea,
-:root[data-theme="dark"] textarea,
-:root[data-theme="dark"] select,
-:root[data-theme="dark"] input[type=text],
-:root[data-theme="dark"] input[type=number] {
+:root[data-theme="dark"] #config-editor input[type=text],
+:root[data-theme="dark"] #config-editor input[type=number],
+:root[data-theme="dark"] #config-editor input[type=password],
+:root[data-theme="dark"] #config-editor textarea,
+:root[data-theme="dark"] #config-editor select,
+:root[data-theme="dark"] #config-editor .form-control,
+:root[data-theme="dark"] #config-editor .je-edit-json--textarea {
   background: var(--color-bg) !important;
   color: var(--color-text) !important;
   border-color: var(--color-border) !important;
 }
-:root[data-theme="dark"] .je-object__container { border-color: var(--color-border) !important; }
-:root[data-theme="dark"] .je-object__controls button,
-:root[data-theme="dark"] .je-array-control-btn { color: var(--color-text-muted) !important; }
-:root[data-theme="dark"] .je-modal { background-color: var(--color-bg-elevated) !important; border-color: var(--color-border) !important; }
-:root[data-theme="dark"] .je-label,
-:root[data-theme="dark"] .je-form-input-label { color: var(--color-text) !important; }
-:root[data-theme="dark"] .je-desc,
-:root[data-theme="dark"] .je-form-input-description { color: var(--color-text-muted) !important; }
+:root[data-theme="dark"] #config-editor .form-control,
+:root[data-theme="dark"] #config-editor .je-object__container,
+:root[data-theme="dark"] #config-editor .je-array__container { background: transparent !important; }
+:root[data-theme="dark"] #config-editor select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238d96a0' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") !important;
+}
+:root[data-theme="dark"] #config-editor .je-indented-panel { border-left-color: var(--color-border) !important; }
+:root[data-theme="dark"] #config-editor .je-object__controls button,
+:root[data-theme="dark"] #config-editor .je-array-control-btn,
+:root[data-theme="dark"] #config-editor .json-editor-btn-collapse,
+:root[data-theme="dark"] #config-editor .json-editor-btn-edit,
+:root[data-theme="dark"] #config-editor .json-editor-btn-properties,
+:root[data-theme="dark"] #config-editor .json-editor-btn-save,
+:root[data-theme="dark"] #config-editor .json-editor-btn-cancel,
+:root[data-theme="dark"] #config-editor .json-editor-btn-copy,
+:root[data-theme="dark"] #config-editor .json-editor-btn-add,
+:root[data-theme="dark"] #config-editor .json-editor-btn-delete,
+:root[data-theme="dark"] #config-editor .json-editor-btn-move {
+  background: var(--color-bg-muted) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+:root[data-theme="dark"] #config-editor .je-modal { background: var(--color-bg-elevated) !important; border-color: var(--color-border) !important; }
+:root[data-theme="dark"] #config-editor .je-label,
+:root[data-theme="dark"] #config-editor .je-form-input-label { color: var(--color-text) !important; }
+:root[data-theme="dark"] #config-editor .je-form-input-description,
+:root[data-theme="dark"] #config-editor .je-desc { color: var(--color-text-muted) !important; }
 
 footer { max-width: 1100px; margin: var(--sp-6) auto 0; padding-top: var(--sp-5); border-top: 1px solid var(--color-border); text-align: center; font-size: var(--fs-sm); color: var(--color-text-muted); }
 
