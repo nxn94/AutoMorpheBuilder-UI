@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Signing in…</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png" />
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; max-width: 480px; margin: 3rem auto; padding: 1rem;
+           color: #1f2328; background: #fafbfc; border: 1px solid #d0d7de; border-radius: 6px; }
+    h1 { margin-top: 0; font-size: 1.2rem; }
+    p { color: #57606a; }
+    code { background: #eff1f3; padding: 0.1em 0.3em; border-radius: 3px; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1 id="status">Signing you in…</h1>
+  <p id="detail">Exchanging the authorization code for an access token.</p>
+  <script type="module">
+    // GitHub redirects the OAuth flow here with ?code=&state= on the query
+    // string. We're on the same origin as the UI (github.io), so window.opener
+    // is preserved across this navigation and postMessage to the opener
+    // works.
+    //
+    // Flow:
+    //   1. Parse code+state from the URL.
+    //   2. POST code+code_verifier to the Cloudflare Worker /token endpoint.
+    //      The worker holds the App's client_secret and exchanges the code.
+    //   3. Send the resulting access_token back to window.opener via postMessage.
+    //   4. Close this popup.
+
+    const status = document.getElementById('status');
+    const detail = document.getElementById('detail');
+    function setStatus(s, d) { if (status) status.textContent = s; if (detail) detail.innerHTML = d; }
+
+    // The worker URL can be overridden via localStorage for local dev/testing.
+    const DEFAULT_AUTH_BASE = 'https://amb-ui-auth.nxn94.workers.dev';
+    const AUTH_BASE = (() => {
+      try { return localStorage.getItem('amb-ui-auth-base') || DEFAULT_AUTH_BASE; } catch { return DEFAULT_AUTH_BASE; }
+    })();
+
+    try {
+      const params = new URLSearchParams(location.search);
+      const err    = params.get('error');
+      if (err) {
+        setStatus('Sign-in failed',
+          '<code>' + err + '</code>' + (params.get('error_description') ? ' &mdash; ' + params.get('error_description') : ''));
+        return;
+      }
+      const code  = params.get('code');
+      const state = params.get('state') || '';
+      if (!code) {
+        setStatus('Sign-in failed', 'No authorization code in the URL.');
+        return;
+      }
+
+      // Split state back into verifier and nonce: "<verifier>.<nonce>"
+      const splitAt = state.lastIndexOf('.');
+      if (splitAt < 1) {
+        setStatus('Sign-in failed', 'Malformed state parameter.');
+        return;
+      }
+      const codeVerifier = state.slice(0, splitAt);
+      const nonce        = state.slice(splitAt + 1);
+
+      setStatus('Exchanging code…', 'Calling the auth worker.');
+
+      const resp = await fetch(AUTH_BASE + '/token', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ code, code_verifier: codeVerifier }),
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok || data.error) {
+        setStatus('Sign-in failed',
+          '<code>' + (data.error || ('HTTP ' + resp.status)) + '</code> &mdash; ' + (data.error_description || 'see the GitHub OAuth docs.'));
+        return;
+      }
+
+      // Send the token back to the opener (the UI main page).
+      if (window.opener) {
+        try {
+          window.opener.postMessage(
+            { type: 'amb-ui-oauth', nonce, token: data.access_token, scope: data.scope },
+            '*',
+          );
+        } catch (e) { /* opener may be gone */ }
+      }
+      setStatus('Signed in', 'You can close this window.');
+      setTimeout(() => { try { window.close(); } catch {} }, 600);
+    } catch (e) {
+      setStatus('Sign-in failed', '<code>' + (e && e.message || e) + '</code>');
+    }
+  </script>
+</body>
+</html>

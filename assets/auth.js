@@ -15,6 +15,17 @@ const AUTH_BASE = (() => {
   try { return localStorage.getItem('amb-ui-auth-base') || DEFAULT_AUTH_BASE; } catch { return DEFAULT_AUTH_BASE; }
 })();
 
+// The GitHub App's OAuth callback URL must be on the same origin as the UI
+// (this page) — otherwise the popup's window.opener is dropped by Chromium
+// when GitHub redirects the OAuth flow across origins, and postMessage
+// back to this page silently fails. This URL must be registered as the
+// App's "Callback URL" in the GitHub App settings.
+//
+// Override via localStorage('amb-ui-auth-redirect') for forks of this repo.
+const AUTH_BASE_REDIRECT = (() => {
+  try { return localStorage.getItem('amb-ui-auth-redirect') || (location.origin + '/auth-callback.html'); } catch { return location.origin + '/auth-callback.html'; }
+})();
+
 // ─── PKCE helpers ───────────────────────────────────────────────────────────
 
 function base64url(bytes) {
@@ -104,7 +115,11 @@ export function signIn() {
 
     const authUrl = new URL('https://github.com/login/oauth/authorize');
     authUrl.searchParams.set('client_id',     await ghClientId());
-    authUrl.searchParams.set('redirect_uri',  `${AUTH_BASE}/callback`);
+    // Callback URL must be on the UI's own origin so the popup's window.opener
+    // survives the OAuth redirect chain. The callback page calls our worker's
+    // /token endpoint server-side to exchange the code with the App's
+    // client_secret (which is never exposed to the browser).
+    authUrl.searchParams.set('redirect_uri',  AUTH_BASE_REDIRECT);
     authUrl.searchParams.set('state',         state);
     authUrl.searchParams.set('code_challenge', challenge);
     authUrl.searchParams.set('code_challenge_method', 'S256');
