@@ -21,9 +21,21 @@ const AUTH_BASE = (() => {
 // back to this page silently fails. This URL must be registered as the
 // App's "Callback URL" in the GitHub App settings.
 //
+// For Pages-hosted sites under a project path (e.g. /AutoMorpheBuilder-UI/),
+// location.origin is just the host (no path), so we need to derive the
+// directory of the current page.
+//
 // Override via localStorage('amb-ui-auth-redirect') for forks of this repo.
 const AUTH_BASE_REDIRECT = (() => {
-  try { return localStorage.getItem('amb-ui-auth-redirect') || (location.origin + '/auth-callback.html'); } catch { return location.origin + '/auth-callback.html'; }
+  try {
+    const override = localStorage.getItem('amb-ui-auth-redirect');
+    if (override) return override;
+    // e.g. /AutoMorpheBuilder-UI/index.html -> /AutoMorpheBuilder-UI/auth-callback.html
+    const dir = location.pathname.replace(/[^/]*$/, '');
+    return location.origin + dir + 'auth-callback.html';
+  } catch {
+    return location.origin + '/auth-callback.html';
+  }
 })();
 
 // ─── PKCE helpers ───────────────────────────────────────────────────────────
