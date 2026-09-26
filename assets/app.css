@@ -58,6 +58,10 @@ header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; }
 .brand img { display: block; border-radius: 12px; }
 .brand h1 { margin: 0; }
 .lede { color: var(--color-text-muted); margin: 0; max-width: 70ch; }
+.auth-indicator { margin-top: 0.6rem; min-height: 1.6rem; }
+.auth-indicator a { color: var(--color-text); font-weight: 600; }
+.auth-indicator img { vertical-align: middle; margin-right: 0.3rem; }
+.auth-indicator .btn { margin-left: 0.4rem; }
 
 code {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;

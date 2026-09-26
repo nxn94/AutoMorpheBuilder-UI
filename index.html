@@ -41,6 +41,7 @@
       without hand-editing JSON. Edit <code>patches.json</code> and <code>config.json</code> side by side,
       download the changed files, and commit them back to your fork.
     </p>
+    <div id="auth-indicator" class="auth-indicator"></div>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -86,7 +87,8 @@
     <div id="patches-editor"></div>
 
     <div class="footer-actions" id="patches-actions" hidden>
-      <button class="btn primary" id="patches-download">Download <code>patches.json</code></button>
+      <button class="btn primary" id="patches-save" type="button">Save &amp; open PR</button>
+      <button class="btn"         id="patches-download">Download <code>patches.json</code></button>
       <button class="btn"         id="patches-copy">Copy to clipboard</button>
       <span class="muted" id="patches-diff-info"></span>
     </div>
@@ -120,7 +122,8 @@
     <div id="config-editor"></div>
 
     <div class="footer-actions" id="config-actions" hidden>
-      <button class="btn primary" id="config-download">Download <code>config.json</code></button>
+      <button class="btn primary" id="config-save" type="button">Save &amp; open PR</button>
+      <button class="btn"         id="config-download">Download <code>config.json</code></button>
       <button class="btn"         id="config-copy">Copy to clipboard</button>
       <span class="muted" id="config-diff-info"></span>
     </div>
