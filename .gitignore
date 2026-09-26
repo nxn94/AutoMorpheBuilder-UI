@@ -1,0 +1,11 @@
+# Vendored third-party libraries (intentionally tracked — see README)
+# /assets/json-editor.min.js
+# /assets/json-editor-base.css
+# /assets/json-editor-theme.css
+
+# Local artifacts
+.DS_Store
+*.log
+.idea/
+.vscode/
+node_modules/

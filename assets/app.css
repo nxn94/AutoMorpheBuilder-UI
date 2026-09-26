@@ -1,0 +1,228 @@
+/* ─────────────── App stylesheet (json-editor + patches UI) ─────────────── */
+
+* { box-sizing: border-box; }
+
+body {
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: #1f2328;
+  background: #fafbfc;
+  margin: 0;
+  padding: 0 1.25rem 4rem;
+}
+
+header, .tab-panel { max-width: 1100px; margin: 0 auto; }
+
+header { padding: 1.5rem 0 0.75rem; }
+header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; }
+.lede { color: #57606a; margin: 0; max-width: 70ch; }
+
+code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 0.9em; background: #eff1f3; padding: 0 0.25em; border-radius: 3px; }
+
+a { color: #0969da; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid #d0d7de;
+  max-width: 1100px; margin: 1.25rem auto 0;
+}
+.tab {
+  background: none; border: 0;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  color: #57606a;
+}
+.tab:hover { color: #1f2328; }
+.tab.active {
+  color: #1f2328;
+  font-weight: 600;
+  border-bottom-color: #fd8c73;
+}
+
+.tab-panel { display: none; padding: 1.25rem 0; }
+.tab-panel.active { display: block; }
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+.grow { flex: 1; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.4rem 0.75rem;
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  border-radius: 5px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: #1f2328;
+  font-family: inherit;
+}
+.btn:hover { background: #f3f4f6; border-color: #afb8c1; }
+.btn.primary { background: #1f883d; color: #fff; border-color: #1f883d; }
+.btn.primary:hover { background: #1a7f37; }
+.btn:focus-visible { outline: 2px solid #0969da; outline-offset: 1px; }
+
+label.btn { cursor: pointer; }
+
+.muted { color: #57606a; font-size: 0.875rem; }
+.muted.small { font-size: 0.8rem; }
+
+/* ─── Loaders (fetch-from-github collapsible) ─── */
+.loaders { margin-bottom: 0.75rem; }
+.loaders details {
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 0.4rem 0.75rem;
+}
+.loaders summary { cursor: pointer; font-size: 0.875rem; color: #57606a; }
+.loaders .row { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+.loaders input {
+  flex: 1; min-width: 180px;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #d0d7de; border-radius: 5px;
+  font: inherit;
+}
+.loaders input:focus { outline: 2px solid #0969da; outline-offset: 0; border-color: transparent; }
+
+/* ─── Editor container ─── */
+#patches-editor, #config-editor {
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  padding: 0.75rem;
+  min-height: 80px;
+}
+#patches-editor:empty::before, #config-editor:empty::before {
+  content: "Load a file or click Load sample to begin.";
+  color: #8c959f;
+  font-style: italic;
+}
+
+/* ─── Warnings / errors ─── */
+#patches-warnings, #config-warnings { margin-bottom: 0.5rem; }
+.alert {
+  padding: 0.6rem 0.8rem;
+  border-radius: 5px;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+.alert.error   { background: #ffebe9; border: 1px solid #ff8182; color: #82071e; }
+.alert.warning { background: #fff8c5; border: 1px solid #d4a72c; color: #573a00; }
+.alert.success { background: #dafbe1; border: 1px solid #1f883d; color: #116329; }
+.alert ul { margin: 0.3rem 0 0; padding-left: 1.25rem; }
+
+/* ─── Footer actions ─── */
+.footer-actions {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+/* ─── Custom patches UI (built on top of json-editor for app cards) ─── */
+.patches-app {
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  background: #fff;
+  overflow: hidden;
+}
+.patches-app-head {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
+  cursor: pointer;
+}
+.patches-app-head .chevron { font-size: 0.7rem; color: #57606a; transition: transform 0.15s; }
+.patches-app.collapsed .chevron { transform: rotate(-90deg); }
+.patches-app-head .title { font-weight: 600; flex: 1; }
+.patches-app-head .subtitle { color: #57606a; font-size: 0.85rem; font-family: ui-monospace, monospace; }
+.patches-app-head .counts {
+  font-size: 0.8rem;
+  color: #57606a;
+  background: #fff;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid #d0d7de;
+  border-radius: 999px;
+}
+.patches-app-head .counts .off { color: #82071e; font-weight: 600; }
+
+.patches-app-body { padding: 0.5rem 0.75rem 0.75rem; }
+.patches-app.collapsed .patches-app-body { display: none; }
+
+.patches-controls {
+  display: flex; gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+.patches-controls .btn { padding: 0.2rem 0.5rem; font-size: 0.8rem; }
+.patches-controls input[type=search] {
+  flex: 1;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d0d7de; border-radius: 4px;
+  font: inherit; font-size: 0.85rem;
+}
+
+.patches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.25rem 0.75rem;
+}
+.patches-grid label {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.patches-grid label:hover { background: #f6f8fa; }
+.patches-grid input[type=checkbox] { margin: 0; }
+.patches-grid label.disabled-patch {
+  text-decoration: line-through;
+  color: #8c959f;
+}
+
+.patches-app-actions {
+  display: flex; gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed #d0d7de;
+}
+.patches-app-actions input {
+  flex: 1;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d0d7de; border-radius: 4px;
+  font: inherit; font-size: 0.85rem;
+}
+
+/* ─── About tab ─── */
+#tab-about h2 { margin-top: 0.5rem; }
+#tab-about h3 { margin-top: 1.25rem; }
+#tab-about li { margin-bottom: 0.2rem; }
+
+/* ─── json-editor overrides (so it doesn't fight our toolbar) ─── */
+#config-editor .je-object__container { background: transparent; }
+#config-editor h3 { font-size: 1rem; margin: 0.5rem 0 0.4rem; }
+
+/* ─── Footer ─── */
+footer {
+  max-width: 1100px; margin: 2rem auto 0;
+  padding-top: 1rem;
+  border-top: 1px solid #d0d7de;
+  text-align: center;
+}

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AutoMorpheBuilder UI</title>
+  <meta name="description" content="Configure AutoMorpheBuilder forks visually — edit patches.json and config.json with a live schema-aware form, then download the result." />
+  <link rel="stylesheet" href="assets/json-editor-base.css" />
+  <link rel="stylesheet" href="assets/json-editor-theme.css" />
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+  <header>
+    <h1>AutoMorpheBuilder UI</h1>
+    <p class="lede">
+      Configure your fork of
+      <a href="https://github.com/nxn94/AutoMorpheBuilder" target="_blank" rel="noopener">nxn94/AutoMorpheBuilder</a>
+      without hand-editing JSON. Edit <code>patches.json</code> and <code>config.json</code> side by side,
+      download the changed files, and commit them back to your fork.
+    </p>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" role="tab" data-tab="patches" aria-selected="true">Patches (<code>patches.json</code>)</button>
+    <button class="tab"        role="tab" data-tab="config"  aria-selected="false">Config (<code>config.json</code>)</button>
+    <button class="tab"        role="tab" data-tab="about"   aria-selected="false">About</button>
+  </nav>
+
+  <!-- ───────────────────── PATCHES TAB ───────────────────── -->
+  <section class="tab-panel active" id="tab-patches" role="tabpanel">
+    <div class="toolbar">
+      <label class="btn">
+        Load <code>patches.json</code>
+        <input type="file" id="patches-file" accept=".json,application/json" hidden />
+      </label>
+      <button class="btn" id="patches-load-sample">Load sample</button>
+      <button class="btn" id="patches-clear">Clear</button>
+      <span class="grow"></span>
+      <span class="muted" id="patches-summary">No data loaded</span>
+    </div>
+
+    <div class="loaders">
+      <details>
+        <summary>…or fetch from a GitHub fork</summary>
+        <div class="row">
+          <input type="text" id="patches-repo" placeholder="owner/repo" value="nxn94/AutoMorpheBuilder" />
+          <input type="text" id="patches-branch" placeholder="branch" value="dev" />
+          <button class="btn primary" id="patches-fetch">Fetch</button>
+        </div>
+        <p class="muted small">
+          Requires the fork to be public. Returns the raw file from <code>refs/heads/&lt;branch&gt;</code>.
+        </p>
+      </details>
+    </div>
+
+    <div id="patches-warnings"></div>
+    <div id="patches-editor"></div>
+
+    <div class="footer-actions" id="patches-actions" hidden>
+      <button class="btn primary" id="patches-download">Download <code>patches.json</code></button>
+      <button class="btn"         id="patches-copy">Copy to clipboard</button>
+      <span class="muted" id="patches-diff-info"></span>
+    </div>
+  </section>
+
+  <!-- ───────────────────── CONFIG TAB ───────────────────── -->
+  <section class="tab-panel" id="tab-config" role="tabpanel">
+    <div class="toolbar">
+      <label class="btn">
+        Load <code>config.json</code>
+        <input type="file" id="config-file" accept=".json,application/json" hidden />
+      </label>
+      <button class="btn" id="config-load-sample">Load sample</button>
+      <button class="btn" id="config-clear">Clear</button>
+      <span class="grow"></span>
+      <span class="muted" id="config-summary">No data loaded</span>
+    </div>
+
+    <div class="loaders">
+      <details>
+        <summary>…or fetch from a GitHub fork</summary>
+        <div class="row">
+          <input type="text" id="config-repo" placeholder="owner/repo" value="nxn94/AutoMorpheBuilder" />
+          <input type="text" id="config-branch" placeholder="branch" value="dev" />
+          <button class="btn primary" id="config-fetch">Fetch</button>
+        </div>
+      </details>
+    </div>
+
+    <div id="config-warnings"></div>
+    <div id="config-editor"></div>
+
+    <div class="footer-actions" id="config-actions" hidden>
+      <button class="btn primary" id="config-download">Download <code>config.json</code></button>
+      <button class="btn"         id="config-copy">Copy to clipboard</button>
+      <span class="muted" id="config-diff-info"></span>
+    </div>
+  </section>
+
+  <!-- ───────────────────── ABOUT TAB ───────────────────── -->
+  <section class="tab-panel" id="tab-about" role="tabpanel">
+    <h2>About this UI</h2>
+    <p>
+      A static, no-build, no-server UI for editing <code>AutoMorpheBuilder</code>'s two config files.
+      Loads and validates against the same JSON schema the build pipeline uses, generates output that
+      passes <code>npm run validate:config</code>, and stays under one screen of JavaScript.
+    </p>
+
+    <h3>How to use it</h3>
+    <ol>
+      <li>On the <strong>Patches</strong> tab, click <em>Load sample</em> or upload your own <code>patches.json</code>.</li>
+      <li>Tick the boxes for the patches you want enabled.</li>
+      <li>Click <em>Download patches.json</em> and replace that file in your fork.</li>
+      <li>Repeat for <strong>Config</strong> if you want to add/remove apps, change ABI preference, etc.</li>
+      <li>Commit, push, and run <em>Build Morphe-patched apps</em> via <code>workflow_dispatch</code>.</li>
+    </ol>
+
+    <h3>What the validator checks</h3>
+    <p>
+      Implemented locally in <code>assets/validate.js</code> — mirrors the rules in
+      <code>schemas/config.schema.json</code> and the cross-key checks in
+      <code>.github/scripts/validate-config.js</code>:
+    </p>
+    <ul>
+      <li><code>patch_repos</code> keys must match the Android package-id regex (<code>^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$</code>).</li>
+      <li><code>name</code> must match <code>^[a-z0-9][a-z0-9-]*$</code>.</li>
+      <li><code>repo</code> and <code>apkmirror_path</code> must be <code>owner/slug</code> with no whitespace.</li>
+      <li><code>preferred_arch</code> must be one of <code>arm64-v8a</code>, <code>armeabi-v7a</code>, <code>x86</code>, <code>x86_64</code>.</li>
+      <li><code>cli.branch</code> must be <code>main</code> or <code>dev</code>.</li>
+      <li><code>pin_version</code> and <code>pin_patch_tag</code> are optional; if present, they must match the documented patterns.</li>
+      <li>Cross-key: no two apps can share the same <code>name</code> (release tag collisions).</li>
+    </ul>
+
+    <h3>Limitations</h3>
+    <ul>
+      <li>The UI cannot commit back to GitHub in v1 — it downloads files you commit yourself. PR-back via the Contents API is on the roadmap.</li>
+      <li>The UI does not read <code>patches-list.json</code> from upstream patch repos. It edits whatever patches you currently have toggles for, plus lets you add/remove arbitrary new patches.</li>
+      <li>The UI runs entirely in your browser. No data leaves your machine unless you click <em>Fetch</em>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="muted small">
+      MIT — <a href="https://github.com/nxn94/AutoMorpheBuilder-UI" target="_blank" rel="noopener">source</a>.
+      Schema references upstream at
+      <a href="https://github.com/nxn94/AutoMorpheBuilder/blob/dev/schemas/config.schema.json" target="_blank" rel="noopener">nxn94/AutoMorpheBuilder</a>.
+    </p>
+  </footer>
+
+  <script src="assets/json-editor.min.js"></script>
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>
