@@ -272,11 +272,15 @@ function buildConfigEditor(value) {
     disable_properties: false,
     remove_empty_properties: false,
   });
-  // The 'ready' event fires after JSONEditor finishes its async init;
-  // reading getValue() before then returns a stale value.
-  configEditor.on('ready', () => {
-    runConfigValidation();
+  // The synchronous post-construction value of `getValue()` is the empty
+  // object (JSONEditor 2.x initializes asynchronously). Drive the summary
+  // and validation directly from the loaded data so the first render is
+  // correct, then refresh from the editor after it finishes.
+  updateConfigSummaryWith(value);
+  runConfigValidationWith(value);
+  Promise.resolve().then(() => {
     updateConfigSummary();
+    runConfigValidation();
   });
   configEditor.on('change', () => {
     runConfigValidation();
@@ -294,7 +298,15 @@ function getConfigJson() {
 }
 
 function runConfigValidation() {
+  // Same caveat as updateConfigSummary: read the editor's current value,
+  // which may be stale on the first call after construction. The
+  // microtask in buildConfigEditor re-runs this after JSONEditor
+  // initializes, so users see the correct state on first render.
   const val = configEditor ? configEditor.getValue() : null;
+  return runConfigValidationWith(val);
+}
+
+function runConfigValidationWith(val) {
   const result = validateConfig(val);
   if (!result.valid) {
     showAlert($('#config-warnings'), 'error', 'Config has validation errors:',
@@ -311,6 +323,10 @@ function updateConfigSummary() {
   // The 'change' event listener registered in buildConfigEditor() handles
   // the steady-state case; this initial render just shows the loaded data.
   const val = configEditor ? configEditor.getValue() : null;
+  return updateConfigSummaryWith(val);
+}
+
+function updateConfigSummaryWith(val) {
   if (!val || typeof val !== 'object') { $('#config-summary').textContent = 'No data loaded'; $('#config-actions').hidden = true; return; }
   const apps = val.patch_repos ? Object.keys(val.patch_repos).length : 0;
   $('#config-summary').textContent = apps === 0
