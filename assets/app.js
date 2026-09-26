@@ -210,12 +210,9 @@ const configSchema = {
     },
     patch_repos: {
       type: 'object',
-      format: 'table',
-      title: 'Apps to build',
-      description: 'Keyed by Android package id. Each entry defines a build target.',
-      propertyNames: {
-        pattern: '^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$',
-      },
+      format: 'table', // JSONEditor's table format renders dynamic keys as a table
+      title: 'Apps to build (keyed by Android package id)',
+      description: 'One entry per app. Each key must be a valid Android package id like com.google.android.youtube.',
       additionalProperties: {
         type: 'object',
         title: 'App',
@@ -257,30 +254,45 @@ const configSchema = {
 function buildConfigEditor(value) {
   const container = $('#config-editor');
   container.innerHTML = '';
-  // JSONEditor 2.x global from the vendored bundle
+  // JSONEditor 2.x global from the vendored bundle.
+  // Construction is synchronous; the editor's internal async load() runs
+  // on the next tick and fires the `ready` event when done. Until that
+  // fires, getValue()/setValue() throw "JSON Editor not ready yet".
   configEditor = new JSONEditor(container, {
     schema: configSchema,
-    startval: value,
     theme: 'barebones',
     iconlib: 'null',
     object_layout: 'normal',
     show_errors: 'always',
     required_by_default: true,
-    no_additional_properties: true,
+    // no_additional_properties: true breaks JSONEditor's rendering of
+    // patch_repos, which has dynamic keys (Android package ids) via the
+    // schema's `additionalProperties: { ... }` clause. JSONEditor treats
+    // ANY property not literally listed in `properties` as "additional" and
+    // falls back to an Edit-JSON textarea, silently dropping the data.
+    // The schema's own `additionalProperties: false` already enforces the
+    // structural constraint at validation time.
     disable_collapse: false,
     disable_edit_json: false,
     disable_properties: false,
     remove_empty_properties: false,
   });
-  // The synchronous post-construction value of `getValue()` is the empty
-  // object (JSONEditor 2.x initializes asynchronously). Drive the summary
-  // and validation directly from the loaded data so the first render is
-  // correct, then refresh from the editor after it finishes.
+  // Drive the first render from the just-loaded value so the user sees
+  // accurate state immediately, instead of an empty-editor placeholder.
   updateConfigSummaryWith(value);
   runConfigValidationWith(value);
-  Promise.resolve().then(() => {
-    updateConfigSummary();
+  // Wait for JSONEditor's async load to finish, then populate and re-render.
+  // JSONEditor 2.x only exposes `on()` — no `once()` — so use a flag.
+  configEditor._ambReady = false;
+  configEditor.on('ready', () => {
+    if (configEditor._ambReady) return;
+    configEditor._ambReady = true;
+    if (value !== undefined) {
+      try { configEditor.setValue(value); }
+      catch (e) { console.error('setValue failed:', e); }
+    }
     runConfigValidation();
+    updateConfigSummary();
   });
   configEditor.on('change', () => {
     runConfigValidation();
@@ -356,7 +368,8 @@ $('#config-file').addEventListener('change', async (e) => {
   } catch (err) {
     showAlert($('#config-warnings'), 'error', 'Failed to parse file:', [`${err.message}`]);
   }
-  updateConfigSummary();
+  // No explicit updateConfigSummary(): buildConfigEditor's onload callback
+  // fires once JSONEditor finishes loading. Calling getValue() here throws.
 });
 
 $('#config-load-sample').addEventListener('click', async () => {
@@ -370,7 +383,9 @@ $('#config-load-sample').addEventListener('click', async () => {
   } catch (err) {
     showAlert($('#config-warnings'), 'error', 'Could not fetch sample:', [`${err.message}`]);
   }
-  updateConfigSummary();
+  // No explicit updateConfigSummary() here: buildConfigEditor's onload callback
+  // fires once JSONEditor finishes loading, and the change event keeps the
+  // summary fresh. Calling getValue() before then throws.
 });
 
 $('#config-fetch').addEventListener('click', async () => {
@@ -390,7 +405,8 @@ $('#config-fetch').addEventListener('click', async () => {
   } catch (err) {
     showAlert($('#config-warnings'), 'error', 'Fetch failed:', [`${err.message}`]);
   }
-  updateConfigSummary();
+  // No explicit updateConfigSummary(): buildConfigEditor's onload callback
+  // fires once JSONEditor finishes loading. Calling getValue() here throws.
 });
 
 $('#config-clear').addEventListener('click', () => {
