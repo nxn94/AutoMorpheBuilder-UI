@@ -73,9 +73,9 @@ window.addEventListener('message', async (ev) => {
   if (!ev.origin || !ev.origin.startsWith(AUTH_BASE.replace(/^https?:\/\//, ''))) return;
   const data = ev.data;
   if (!data || data.type !== 'amb-ui-oauth') return;
-  const pending = pendingAuth.get(data.state);
+  const pending = pendingAuth.get(data.nonce);
   if (!pending) return;
-  pendingAuth.delete(data.state);
+  pendingAuth.delete(data.nonce);
   if (data.token) {
     // Look up the user to cache username/avatar for display.
     try {
@@ -92,9 +92,15 @@ window.addEventListener('message', async (ev) => {
 
 export function signIn() {
   return new Promise(async (resolve, reject) => {
-    const state = base64url(randomBytes(16));
+    const nonce = base64url(randomBytes(16));
     const { verifier, challenge } = await pkcePair();
-    pendingAuth.set(state, { resolve, reject });
+    // Encode the PKCE verifier in the `state` parameter. GitHub echoes state
+    // back unchanged through the redirect, and OAuth state is the standard
+    // way to round-trip PKCE in the authorization-code-with-PKCE flow.
+    // We separate the verifier from the nonce so the UI can verify the
+    // callback matches the flow it initiated.
+    const state = `${verifier}.${nonce}`;
+    pendingAuth.set(nonce, { resolve, reject });
 
     const authUrl = new URL('https://github.com/login/oauth/authorize');
     authUrl.searchParams.set('client_id',     await ghClientId());
@@ -106,18 +112,15 @@ export function signIn() {
 
     const popup = window.open(authUrl.toString(), 'amb-ui-oauth', 'width=600,height=700');
     if (!popup) {
-      pendingAuth.delete(state);
+      pendingAuth.delete(nonce);
       reject(new Error('Popup blocked. Allow popups for this site and try again.'));
       return;
     }
-    // Pass the verifier via window.name so the popup's /done page can read it
-    // (window.name survives the cross-origin redirect).
-    popup.name = verifier;
 
     // Timeout after 2 minutes.
     setTimeout(() => {
-      if (pendingAuth.has(state)) {
-        pendingAuth.delete(state);
+      if (pendingAuth.has(nonce)) {
+        pendingAuth.delete(nonce);
         reject(new Error('Sign-in timed out after 2 minutes.'));
         try { popup.close(); } catch {}
       }

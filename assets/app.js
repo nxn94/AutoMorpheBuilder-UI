@@ -272,6 +272,12 @@ function buildConfigEditor(value) {
     disable_properties: false,
     remove_empty_properties: false,
   });
+  // The 'ready' event fires after JSONEditor finishes its async init;
+  // reading getValue() before then returns a stale value.
+  configEditor.on('ready', () => {
+    runConfigValidation();
+    updateConfigSummary();
+  });
   configEditor.on('change', () => {
     runConfigValidation();
     updateConfigSummary();
@@ -300,6 +306,10 @@ function runConfigValidation() {
 }
 
 function updateConfigSummary() {
+  // JSONEditor v2.x initializes its value asynchronously, so a synchronous
+  // call immediately after buildConfigEditor() may read a stale/empty value.
+  // The 'change' event listener registered in buildConfigEditor() handles
+  // the steady-state case; this initial render just shows the loaded data.
   const val = configEditor ? configEditor.getValue() : null;
   if (!val || typeof val !== 'object') { $('#config-summary').textContent = 'No data loaded'; $('#config-actions').hidden = true; return; }
   const apps = val.patch_repos ? Object.keys(val.patch_repos).length : 0;
