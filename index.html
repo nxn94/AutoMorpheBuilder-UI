@@ -11,11 +11,19 @@
   <link rel="stylesheet" href="assets/app.css" />
   <script>
     // Resolve theme as early as possible to avoid a flash of wrong palette.
-    // Order: localStorage('auto'|'light'|'dark') > matchMedia('(prefers-color-scheme: dark)').
+    // Priority:
+    //   1. localStorage('amb-ui-theme') if it is one of light/dark/auto
+    //   2. otherwise fall back to 'auto' (which follows the OS preference)
+    // To force-reset: in DevTools console, run localStorage.removeItem('amb-ui-theme')
+    // and reload.
     (function () {
       try {
         var stored = localStorage.getItem('amb-ui-theme');
         var theme = (stored === 'light' || stored === 'dark' || stored === 'auto') ? stored : 'auto';
+        // If we found an invalid value, clear it so subsequent loads are clean.
+        if (stored !== null && theme === 'auto' && stored !== 'auto') {
+          localStorage.removeItem('amb-ui-theme');
+        }
         document.documentElement.setAttribute('data-theme', theme);
       } catch (e) { /* localStorage blocked — fall back to media-query only */ }
     })();
