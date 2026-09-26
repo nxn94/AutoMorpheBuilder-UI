@@ -399,13 +399,12 @@ label.btn { cursor: pointer; }
   margin-top: 4px !important;
 }
 
-/* Selectize-style select dropdowns */
+/* Selectize-style select dropdowns. Use background: shorthand everywhere
+   to avoid the trap where redeclaring background-image in dark mode
+   resets background-repeat / background-size to defaults. */
 #config-editor select {
   padding-right: 28px !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2357606a' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 8px center !important;
-  background-size: 12px !important;
+  background: var(--color-bg-elevated) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2357606a' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") no-repeat right 8px center / 12px !important;
   appearance: none !important;
   -webkit-appearance: none !important;
   cursor: pointer !important;
@@ -529,7 +528,7 @@ label.btn { cursor: pointer; }
   :root:not([data-theme="light"]) #config-editor .je-object__container,
   :root:not([data-theme="light"]) #config-editor .je-array__container { background: transparent !important; }
   :root:not([data-theme="light"]) #config-editor select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238d96a0' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") !important;
+    background: var(--color-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238d96a0' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") no-repeat right 8px center / 12px !important;
   }
   :root:not([data-theme="light"]) #config-editor .je-indented-panel { border-left-color: var(--color-border) !important; }
   :root:not([data-theme="light"]) #config-editor .je-object__controls button,
@@ -568,7 +567,7 @@ label.btn { cursor: pointer; }
 :root[data-theme="dark"] #config-editor .je-object__container,
 :root[data-theme="dark"] #config-editor .je-array__container { background: transparent !important; }
 :root[data-theme="dark"] #config-editor select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238d96a0' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") !important;
+  background: var(--color-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238d96a0' d='M6 8.5L1.5 4h9z'/%3E%3C/svg%3E") no-repeat right 8px center / 12px !important;
 }
 :root[data-theme="dark"] #config-editor .je-indented-panel { border-left-color: var(--color-border) !important; }
 :root[data-theme="dark"] #config-editor .je-object__controls button,
