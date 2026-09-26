@@ -92,8 +92,11 @@ export function isAuthenticated() { return !!getToken(); }
 const pendingAuth = new Map(); // state → {resolve, reject}
 
 window.addEventListener('message', async (ev) => {
-  // Only trust messages from our auth worker (don't accept tokens from random origins).
-  if (!ev.origin || !ev.origin.startsWith(AUTH_BASE.replace(/^https?:\/\//, ''))) return;
+  // Only trust messages from the same origin (the OAuth popup lives on
+  // github.io alongside us). The actual token exchange happens server-side
+  // via the worker's /token endpoint (CORS-protected), so the popup never
+  // has to reveal its origin to a third party.
+  if (!ev.origin || ev.origin !== location.origin) return;
   const data = ev.data;
   if (!data || data.type !== 'amb-ui-oauth') return;
   const pending = pendingAuth.get(data.nonce);
