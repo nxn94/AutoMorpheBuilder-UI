@@ -20,6 +20,33 @@ document.querySelectorAll('.tab').forEach(tabBtn => {
   });
 });
 
+// ─── Theme toggle ──────────────────────────────────────────────────────────
+// Cycle: auto → light → dark → auto. 'auto' tracks prefers-color-scheme.
+const THEME_KEY = 'amb-ui-theme';
+const THEME_CYCLE = ['auto', 'light', 'dark'];
+
+function currentTheme() {
+  return document.documentElement.getAttribute('data-theme') || 'auto';
+}
+
+function applyTheme(theme) {
+  if (!THEME_CYCLE.includes(theme)) theme = 'auto';
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem(THEME_KEY, theme); } catch {}
+  const btn = document.querySelector('#theme-toggle');
+  if (btn) btn.title = `Theme: ${theme} (click to switch)`;
+}
+
+document.querySelector('#theme-toggle')?.addEventListener('click', () => {
+  const next = THEME_CYCLE[(THEME_CYCLE.indexOf(currentTheme()) + 1) % THEME_CYCLE.length];
+  applyTheme(next);
+});
+
+// If the OS preference changes while we're in 'auto', the @media query
+// already handles repaint — nothing JS-side is needed. Keep the button
+// title in sync on load.
+applyTheme(currentTheme());
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 const $ = sel => document.querySelector(sel);
 

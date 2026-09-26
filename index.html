@@ -9,6 +9,17 @@
   <link rel="stylesheet" href="assets/json-editor-base.css" />
   <link rel="stylesheet" href="assets/json-editor-theme.css" />
   <link rel="stylesheet" href="assets/app.css" />
+  <script>
+    // Resolve theme as early as possible to avoid a flash of wrong palette.
+    // Order: localStorage('auto'|'light'|'dark') > matchMedia('(prefers-color-scheme: dark)').
+    (function () {
+      try {
+        var stored = localStorage.getItem('amb-ui-theme');
+        var theme = (stored === 'light' || stored === 'dark' || stored === 'auto') ? stored : 'auto';
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) { /* localStorage blocked — fall back to media-query only */ }
+    })();
+  </script>
 </head>
 <body>
   <header>
@@ -28,6 +39,12 @@
     <button class="tab active" role="tab" data-tab="patches" aria-selected="true">Patches (<code>patches.json</code>)</button>
     <button class="tab"        role="tab" data-tab="config"  aria-selected="false">Config (<code>config.json</code>)</button>
     <button class="tab"        role="tab" data-tab="about"   aria-selected="false">About</button>
+    <span class="spacer"></span>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle theme" title="Cycle theme: auto / light / dark">
+      <span class="icon-auto" aria-hidden="true">🌓</span>
+      <span class="icon-sun"  aria-hidden="true">☀️</span>
+      <span class="icon-moon" aria-hidden="true">🌙</span>
+    </button>
   </nav>
 
   <!-- ───────────────────── PATCHES TAB ───────────────────── -->

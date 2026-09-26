@@ -1,13 +1,53 @@
 /* ─────────────── App stylesheet (json-editor + patches UI) ─────────────── */
 
+/* ─── Theme variables ─── */
+:root {
+  /* Light theme (default) */
+  --color-bg:             #fafbfc;
+  --color-bg-elevated:    #ffffff;
+  --color-bg-muted:       #f6f8fa;
+  --color-bg-hover:       #f3f4f6;
+  --color-border:         #d0d7de;
+  --color-border-strong:  #afb8c1;
+  --color-text:           #1f2328;
+  --color-text-muted:     #57606a;
+  --color-text-faint:     #8c959f;
+  --color-link:           #0969da;
+  --color-code-bg:        #eff1f3;
+
+  /* Accent */
+  --color-accent:         #fd8c73;
+  --color-accent-text:    #ffffff;
+
+  /* Primary button */
+  --color-primary:        #1f883d;
+  --color-primary-hover:  #1a7f37;
+  --color-primary-text:   #ffffff;
+
+  /* Alerts */
+  --color-error-bg:       #ffebe9;
+  --color-error-border:   #ff8182;
+  --color-error-text:     #82071e;
+  --color-warning-bg:     #fff8c5;
+  --color-warning-border: #d4a72c;
+  --color-warning-text:   #573a00;
+  --color-success-bg:     #dafbe1;
+  --color-success-border: #1f883d;
+  --color-success-text:   #116329;
+
+  /* Shadow for focus rings etc. */
+  --shadow-focus:         0 0 0 2px var(--color-link);
+}
+
 * { box-sizing: border-box; }
 
 body {
   font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  color: #1f2328;
-  background: #fafbfc;
+  color: var(--color-text);
+  background: var(--color-bg);
   margin: 0;
   padding: 0 1.25rem 4rem;
+  transition: background-color 0.15s, color 0.15s;
 }
 
 header, .tab-panel { max-width: 1100px; margin: 0 auto; }
@@ -17,32 +57,63 @@ header h1 { margin: 0 0 0.4rem; font-size: 1.6rem; }
 .brand { display: flex; align-items: center; gap: 0.85rem; margin-bottom: 0.4rem; }
 .brand img { display: block; border-radius: 12px; }
 .brand h1 { margin: 0; }
-.lede { color: #57606a; margin: 0; max-width: 70ch; }
+.lede { color: var(--color-text-muted); margin: 0; max-width: 70ch; }
 
-code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; font-size: 0.9em; background: #eff1f3; padding: 0 0.25em; border-radius: 3px; }
+code {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 0.9em;
+  background: var(--color-code-bg);
+  padding: 0 0.25em;
+  border-radius: 3px;
+}
 
-a { color: #0969da; text-decoration: none; }
+a { color: var(--color-link); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+/* ─── Theme toggle ─── */
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.3rem 0.55rem 0.3rem 0.45rem;
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: inherit;
+}
+.theme-toggle:hover { background: var(--color-bg-hover); color: var(--color-text); }
+.theme-toggle:focus-visible { outline: 2px solid var(--color-link); outline-offset: 1px; }
+.theme-toggle .icon-auto,
+.theme-toggle .icon-sun,
+.theme-toggle .icon-moon { display: none; }
+:root[data-theme="auto"]  .theme-toggle .icon-auto,
+:root[data-theme="light"] .theme-toggle .icon-sun,
+:root[data-theme="dark"]  .theme-toggle .icon-moon { display: inline; }
 
 /* ─── Tabs ─── */
 .tabs {
-  display: flex; gap: 0;
-  border-bottom: 1px solid #d0d7de;
+  display: flex; gap: 0; align-items: center;
+  border-bottom: 1px solid var(--color-border);
   max-width: 1100px; margin: 1.25rem auto 0;
 }
+.tabs .spacer { flex: 1; }
 .tab {
   background: none; border: 0;
   padding: 0.6rem 1rem;
   font-size: 0.95rem;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  color: #57606a;
+  color: var(--color-text-muted);
 }
-.tab:hover { color: #1f2328; }
+.tab:hover { color: var(--color-text); }
 .tab.active {
-  color: #1f2328;
+  color: var(--color-text);
   font-weight: 600;
-  border-bottom-color: #fd8c73;
+  border-bottom-color: var(--color-accent);
 }
 
 .tab-panel { display: none; padding: 1.25rem 0; }
@@ -52,8 +123,8 @@ a:hover { text-decoration: underline; }
 .toolbar {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.75rem;
-  background: #fff;
-  border: 1px solid #d0d7de;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   margin-bottom: 0.75rem;
   flex-wrap: wrap;
@@ -63,53 +134,55 @@ a:hover { text-decoration: underline; }
 .btn {
   display: inline-flex; align-items: center; gap: 0.3rem;
   padding: 0.4rem 0.75rem;
-  background: #f6f8fa;
-  border: 1px solid #d0d7de;
+  background: var(--color-bg-muted);
+  border: 1px solid var(--color-border);
   border-radius: 5px;
   font-size: 0.875rem;
   cursor: pointer;
-  color: #1f2328;
+  color: var(--color-text);
   font-family: inherit;
 }
-.btn:hover { background: #f3f4f6; border-color: #afb8c1; }
-.btn.primary { background: #1f883d; color: #fff; border-color: #1f883d; }
-.btn.primary:hover { background: #1a7f37; }
-.btn:focus-visible { outline: 2px solid #0969da; outline-offset: 1px; }
+.btn:hover { background: var(--color-bg-hover); border-color: var(--color-border-strong); }
+.btn.primary { background: var(--color-primary); color: var(--color-primary-text); border-color: var(--color-primary); }
+.btn.primary:hover { background: var(--color-primary-hover); border-color: var(--color-primary-hover); }
+.btn:focus-visible { outline: 2px solid var(--color-link); outline-offset: 1px; }
 
 label.btn { cursor: pointer; }
 
-.muted { color: #57606a; font-size: 0.875rem; }
+.muted { color: var(--color-text-muted); font-size: 0.875rem; }
 .muted.small { font-size: 0.8rem; }
 
 /* ─── Loaders (fetch-from-github collapsible) ─── */
 .loaders { margin-bottom: 0.75rem; }
 .loaders details {
-  background: #fff;
-  border: 1px solid #d0d7de;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 0.4rem 0.75rem;
 }
-.loaders summary { cursor: pointer; font-size: 0.875rem; color: #57606a; }
+.loaders summary { cursor: pointer; font-size: 0.875rem; color: var(--color-text-muted); }
 .loaders .row { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
 .loaders input {
   flex: 1; min-width: 180px;
   padding: 0.4rem 0.5rem;
-  border: 1px solid #d0d7de; border-radius: 5px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  border: 1px solid var(--color-border); border-radius: 5px;
   font: inherit;
 }
-.loaders input:focus { outline: 2px solid #0969da; outline-offset: 0; border-color: transparent; }
+.loaders input:focus { outline: 2px solid var(--color-link); outline-offset: 0; border-color: transparent; }
 
 /* ─── Editor container ─── */
 #patches-editor, #config-editor {
-  background: #fff;
-  border: 1px solid #d0d7de;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 0.75rem;
   min-height: 80px;
 }
 #patches-editor:empty::before, #config-editor:empty::before {
   content: "Load a file or click Load sample to begin.";
-  color: #8c959f;
+  color: var(--color-text-faint);
   font-style: italic;
 }
 
@@ -121,9 +194,9 @@ label.btn { cursor: pointer; }
   margin-bottom: 0.5rem;
   font-size: 0.875rem;
 }
-.alert.error   { background: #ffebe9; border: 1px solid #ff8182; color: #82071e; }
-.alert.warning { background: #fff8c5; border: 1px solid #d4a72c; color: #573a00; }
-.alert.success { background: #dafbe1; border: 1px solid #1f883d; color: #116329; }
+.alert.error   { background: var(--color-error-bg);    border: 1px solid var(--color-error-border);    color: var(--color-error-text); }
+.alert.warning { background: var(--color-warning-bg);  border: 1px solid var(--color-warning-border);  color: var(--color-warning-text); }
+.alert.success { background: var(--color-success-bg);  border: 1px solid var(--color-success-border);  color: var(--color-success-text); }
 .alert ul { margin: 0.3rem 0 0; padding-left: 1.25rem; }
 
 /* ─── Footer actions ─── */
@@ -131,39 +204,39 @@ label.btn { cursor: pointer; }
   display: flex; align-items: center; gap: 0.5rem;
   margin-top: 0.75rem;
   padding: 0.6rem 0.75rem;
-  background: #fff;
-  border: 1px solid #d0d7de;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
   border-radius: 6px;
 }
 
 /* ─── Custom patches UI (built on top of json-editor for app cards) ─── */
 .patches-app {
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   margin-bottom: 0.75rem;
-  background: #fff;
+  background: var(--color-bg-elevated);
   overflow: hidden;
 }
 .patches-app-head {
   display: flex; align-items: center; gap: 0.75rem;
   padding: 0.6rem 0.75rem;
-  background: #f6f8fa;
-  border-bottom: 1px solid #d0d7de;
+  background: var(--color-bg-muted);
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
 }
-.patches-app-head .chevron { font-size: 0.7rem; color: #57606a; transition: transform 0.15s; }
+.patches-app-head .chevron { font-size: 0.7rem; color: var(--color-text-muted); transition: transform 0.15s; }
 .patches-app.collapsed .chevron { transform: rotate(-90deg); }
 .patches-app-head .title { font-weight: 600; flex: 1; }
-.patches-app-head .subtitle { color: #57606a; font-size: 0.85rem; font-family: ui-monospace, monospace; }
+.patches-app-head .subtitle { color: var(--color-text-muted); font-size: 0.85rem; font-family: ui-monospace, monospace; }
 .patches-app-head .counts {
   font-size: 0.8rem;
-  color: #57606a;
-  background: #fff;
+  color: var(--color-text-muted);
+  background: var(--color-bg-elevated);
   padding: 0.15rem 0.5rem;
-  border: 1px solid #d0d7de;
+  border: 1px solid var(--color-border);
   border-radius: 999px;
 }
-.patches-app-head .counts .off { color: #82071e; font-weight: 600; }
+.patches-app-head .counts .off { color: var(--color-error-text); font-weight: 600; }
 
 .patches-app-body { padding: 0.5rem 0.75rem 0.75rem; }
 .patches-app.collapsed .patches-app-body { display: none; }
@@ -177,7 +250,9 @@ label.btn { cursor: pointer; }
 .patches-controls input[type=search] {
   flex: 1;
   padding: 0.25rem 0.5rem;
-  border: 1px solid #d0d7de; border-radius: 4px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  border: 1px solid var(--color-border); border-radius: 4px;
   font: inherit; font-size: 0.85rem;
 }
 
@@ -193,23 +268,25 @@ label.btn { cursor: pointer; }
   cursor: pointer;
   font-size: 0.875rem;
 }
-.patches-grid label:hover { background: #f6f8fa; }
+.patches-grid label:hover { background: var(--color-bg-muted); }
 .patches-grid input[type=checkbox] { margin: 0; }
 .patches-grid label.disabled-patch {
   text-decoration: line-through;
-  color: #8c959f;
+  color: var(--color-text-faint);
 }
 
 .patches-app-actions {
   display: flex; gap: 0.5rem;
   margin-top: 0.6rem;
   padding-top: 0.6rem;
-  border-top: 1px dashed #d0d7de;
+  border-top: 1px dashed var(--color-border);
 }
 .patches-app-actions input {
   flex: 1;
   padding: 0.25rem 0.5rem;
-  border: 1px solid #d0d7de; border-radius: 4px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  border: 1px solid var(--color-border); border-radius: 4px;
   font: inherit; font-size: 0.85rem;
 }
 
@@ -226,6 +303,114 @@ label.btn { cursor: pointer; }
 footer {
   max-width: 1100px; margin: 2rem auto 0;
   padding-top: 1rem;
-  border-top: 1px solid #d0d7de;
+  border-top: 1px solid var(--color-border);
   text-align: center;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dark theme — auto-detected by default, can be pinned by data-theme="dark"
+   on <html>, or forced light by data-theme="light".
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Auto: apply dark whenever the OS reports dark AND the user hasn't pinned light */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg:             #0d1117;
+    --color-bg-elevated:    #161b22;
+    --color-bg-muted:       #21262d;
+    --color-bg-hover:       #30363d;
+    --color-border:         #30363d;
+    --color-border-strong:  #484f58;
+    --color-text:           #e6edf3;
+    --color-text-muted:     #8d96a0;
+    --color-text-faint:     #6e7681;
+    --color-link:           #58a6ff;
+    --color-code-bg:        #161b22;
+
+    --color-accent:         #ff9d7a;
+    --color-primary:        #3fb950;
+    --color-primary-hover:  #2ea043;
+
+    --color-error-bg:       #3d1d20;
+    --color-error-border:   #b62324;
+    --color-error-text:     #ff7b72;
+    --color-warning-bg:     #3d2e00;
+    --color-warning-border: #9e6a03;
+    --color-warning-text:   #d29922;
+    --color-success-bg:     #1b3a23;
+    --color-success-border: #2ea043;
+    --color-success-text:   #3fb950;
+  }
+}
+
+/* Pinned dark — wins over auto even if OS reports light */
+:root[data-theme="dark"] {
+  --color-bg:             #0d1117;
+  --color-bg-elevated:    #161b22;
+  --color-bg-muted:       #21262d;
+  --color-bg-hover:       #30363d;
+  --color-border:         #30363d;
+  --color-border-strong:  #484f58;
+  --color-text:           #e6edf3;
+  --color-text-muted:     #8d96a0;
+  --color-text-faint:     #6e7681;
+  --color-link:           #58a6ff;
+  --color-code-bg:        #161b22;
+
+  --color-accent:         #ff9d7a;
+  --color-primary:        #3fb950;
+  --color-primary-hover:  #2ea043;
+
+  --color-error-bg:       #3d1d20;
+  --color-error-border:   #b62324;
+  --color-error-text:     #ff7b72;
+  --color-warning-bg:     #3d2e00;
+  --color-warning-border: #9e6a03;
+  --color-warning-text:   #d29922;
+  --color-success-bg:     #1b3a23;
+  --color-success-border: #2ea043;
+  --color-success-text:   #3fb950;
+}
+
+/* ─── JSONEditor (barebones) theme tweaks for dark mode ───
+   The barebones theme uses generic classes (.form-control, .je-checkbox,
+   .je-radio, .je-object__container, .je-modal) — the table/object
+   variants (.je-array__container, .je-textbox) don't exist here.         */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .form-control,
+  :root:not([data-theme="light"]) .je-edit-json--textarea,
+  :root:not([data-theme="light"]) textarea,
+  :root:not([data-theme="light"]) select,
+  :root:not([data-theme="light"]) input[type=text],
+  :root:not([data-theme="light"]) input[type=number] {
+    background: var(--color-bg) !important;
+    color: var(--color-text) !important;
+    border-color: var(--color-border) !important;
+  }
+  :root:not([data-theme="light"]) .je-object__container { border-color: var(--color-border) !important; }
+  :root:not([data-theme="light"]) .je-object__controls button,
+  :root:not([data-theme="light"]) .je-array-control-btn { color: var(--color-text-muted) !important; }
+  :root:not([data-theme="light"]) .je-modal { background-color: var(--color-bg-elevated) !important; border-color: var(--color-border) !important; }
+  :root:not([data-theme="light"]) .je-label,
+  :root:not([data-theme="light"]) .je-form-input-label { color: var(--color-text) !important; }
+  :root:not([data-theme="light"]) .je-desc,
+  :root:not([data-theme="light"]) .je-form-input-description { color: var(--color-text-muted) !important; }
+}
+:root[data-theme="dark"] .form-control,
+:root[data-theme="dark"] .je-edit-json--textarea,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] input[type=text],
+:root[data-theme="dark"] input[type=number] {
+  background: var(--color-bg) !important;
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+:root[data-theme="dark"] .je-object__container { border-color: var(--color-border) !important; }
+:root[data-theme="dark"] .je-object__controls button,
+:root[data-theme="dark"] .je-array-control-btn { color: var(--color-text-muted) !important; }
+:root[data-theme="dark"] .je-modal { background-color: var(--color-bg-elevated) !important; border-color: var(--color-border) !important; }
+:root[data-theme="dark"] .je-label,
+:root[data-theme="dark"] .je-form-input-label { color: var(--color-text) !important; }
+:root[data-theme="dark"] .je-desc,
+:root[data-theme="dark"] .je-form-input-description { color: var(--color-text-muted) !important; }
