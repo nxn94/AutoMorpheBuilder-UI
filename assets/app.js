@@ -258,7 +258,7 @@ const configSchema = {
         required: ['name', 'repo', 'branch', 'apkmirror_path'],
         properties: {
           name:               { type: 'string', pattern: '^[a-z0-9][a-z0-9-]*$', description: 'Release-name slug (lowercase, hyphens). Used in release tags.' },
-          repo:               { type: 'string', pattern: '^[^/\\s]+/[^/\\s]+$',       description: 'owner/repo of the patch repo on GitHub.' },
+          repo:               { type: 'string', pattern: '^[^/\\s]+/[^/\\s]+$',       description: 'owner/repo of the patch repo on GitHub. Use "gitlab:owner/project" to build from a GitLab patch source.' },
           branch:             { type: 'string', pattern: '^[A-Za-z0-9._/-]+$',        description: 'Branch of the patch repo.' },
           apkmirror_path:     { type: 'string', pattern: '^[^/\\s]+/[^/\\s]+$',       description: 'APKMirror publisher/package slug.' },
           pin_version:        { type: 'string', pattern: '^\\d+(\\.\\d+)+$',          description: 'Optional. Pin a specific APK version (e.g. "20.44.38").' },

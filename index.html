@@ -147,6 +147,12 @@
       <li>Commit, push, and run <em>Build Morphe-patched apps</em> via <code>workflow_dispatch</code>.</li>
     </ol>
 
+    <p class="muted small">
+      Patch sources can be hosted on GitHub (<code>owner/slug</code>) or GitLab
+      (<code>gitlab:owner/slug</code>). The <code>repo</code> field accepts both — GitLab support was
+      added to the builder in <a href="https://github.com/nxn94/AutoMorpheBuilder/pull/102" target="_blank" rel="noopener">#102</a>.
+    </p>
+
     <h3>What the validator checks</h3>
     <p>
       Implemented locally in <code>assets/validate.js</code> — mirrors the rules in
@@ -156,7 +162,8 @@
     <ul>
       <li><code>patch_repos</code> keys must match the Android package-id regex (<code>^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$</code>).</li>
       <li><code>name</code> must match <code>^[a-z0-9][a-z0-9-]*$</code>.</li>
-      <li><code>repo</code> and <code>apkmirror_path</code> must be <code>owner/slug</code> with no whitespace.</li>
+      <li><code>repo</code> is <code>owner/slug</code> for GitHub, or <code>gitlab:owner/slug</code> to build from a GitLab patch source.</li>
+      <li><code>apkmirror_path</code> must be <code>owner/slug</code> with no whitespace.</li>
       <li><code>preferred_arch</code> must be one of <code>arm64-v8a</code>, <code>armeabi-v7a</code>, <code>x86</code>, <code>x86_64</code>.</li>
       <li><code>cli.branch</code> must be <code>main</code> or <code>dev</code>.</li>
       <li><code>pin_version</code> and <code>pin_patch_tag</code> are optional; if present, they must match the documented patterns.</li>
